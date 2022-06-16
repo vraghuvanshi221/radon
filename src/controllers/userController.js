@@ -2,22 +2,30 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 
 const createUser = async function (abcd, xyz) {
-  //You can name the req, res objects anything.
-  //but the first parameter is always the request 
-  //the second parameter is always the response
+  try{ 
+
   let data = abcd.body;
+  if ( Object.keys(data).length != 0){
   let savedData = await userModel.create(data);
   console.log(abcd.newAtribute);
-  xyz.send({ msg: savedData });
+ xyz.status(201).send({ msg: savedData });
+}
+else res.status(400).send({ msg: "BAD REQUEST"})
+}
+catch (err) {
+  console.log("This is the error :", err.message)
+  res.status(500).send({ msg: "Error", error: err.message })
+}
 };
 
 const loginUser = async function (req, res) {
+  try{
   let userName = req.body.emailId;
   let password = req.body.password;
 
   let user = await userModel.findOne({ emailId: userName, password: password });
   if (!user)
-    return res.send({
+    return res.status(401).send({
       status: false,
       msg: "username or the password is not corerct",
     });
@@ -37,7 +45,11 @@ const loginUser = async function (req, res) {
     "functionup-thorium"
   );
   res.setHeader("x-auth-token", token);
-  res.send({ status: true, data: token });
+  res.status(200).send({ status: true, data: token });
+  }
+  catch (err) {
+    console.log("This is the error :", err.message)
+    res.status(500).send({ msg: "Error", error: err.message }) }
 };
 
 const getUserData = async function (req, res) {
